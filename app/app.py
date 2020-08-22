@@ -5,13 +5,13 @@ import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
+import numpy as np
 
 data = pd.read_csv("Lounge_Occupancy_Count.csv") #extracting from data dump 
 date = '1/3/19'
 # time = '12am - 5am'
 lounge_area = 'Occupancy Rate (Biz -Dining )'
 # occupancy = data[ (data['Date']==date) & (data['Time'] == time ) ][lounge_area]
-
 
 app = dash.Dash(__name__)
 server = app.server
@@ -48,13 +48,14 @@ app.layout = html.Div([
 
 def update_output(value):
     temp = 'Occupancy Rate ('+value+" )"
-    return {
-    'data': [go.Heatmap(
-    x=data[(data['Date']==date)]['Time'],
-    y=data[(data['Date']==date)][temp])]
-    }
-
-
+    z = np.random.poisson(size=(len(data[(data['Date']==date)]['Time'].tolist()), len(data[(data['Date']==date)][temp].tolist())))
+    fig = go.Figure(data=go.Heatmap(
+        y = data[(data['Date']==date)]['Time'].tolist(),
+        x = data[(data['Date']==date)][temp].tolist(),
+        z = z,
+        colorscale = 'Viridis'))
+    return html.Div([dcc.Graph(figure=fig)])
+ 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
